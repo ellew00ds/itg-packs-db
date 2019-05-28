@@ -1,7 +1,7 @@
 # In The Groove Packs Database
 Source code for In The Groove packs database, containing song information by pack
 
-This is currently a non-working project
+This is currently a non-working project. [This can be used](https://search.stepmaniaonline.net/) as inspiration.
 
 ### Prerequesites
 TBD
