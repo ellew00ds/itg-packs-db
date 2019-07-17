@@ -8,18 +8,18 @@ TBD
 
 ### Steps to completion
 
-* Manually download all packs in [spreadsheet](www.secretsryboutit.com) to an AWS S3 bucket
+* Manually download all packs in `spreadsheet` to one of the hard drives on `the server`
 	* These are a mix of GDrive, Dropbox, etc. links
 
 * Unzip packs
 
 * Determine where and how metadata is stored for artist name, step difficulties, etc.
 
-* Create a Postgres database in AWS
+* Create a [FaunaDB instance](https://dashboard.fauna.com/)
 
-* Each song will be a row in a single database
+* Each song will be a record in a single database
 
-* Database columns will be:
+* Keys will be:
 	* song_name
 	* song_artist
 	* song_link
@@ -30,6 +30,7 @@ TBD
 ## Built With
 
 * Python 3
+* FaunaDB
 * Flask
 
 ## Contributors
