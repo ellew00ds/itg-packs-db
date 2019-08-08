@@ -155,4 +155,14 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# no __MACOSX files
+__MACOSX
+
+# no packs or dls
+packs/
+dl/
+
+# No t.py
+t.py
+
 # End of https://www.gitignore.io/api/macos,python
