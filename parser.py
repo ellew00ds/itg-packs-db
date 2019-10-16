@@ -47,9 +47,8 @@ def parse_ssc_file(filename=None):
         else:
             parsed[k] = v
 
-<<<<<<< HEAD
     repeated_parsed = [None for _ in list(repeated.values())[0]]
-    print(repeated_parsed)
+    print("repeated_parsed:", repeated_parsed)
     for k, v in repeated.items():
         for pos, val in enumerate(v):
             item = repeated_parsed[pos] or {}
@@ -63,11 +62,8 @@ def parse_ssc_file(filename=None):
             ), repeated_parsed)
         )
     parsed['sequences'] = repeated_parsed
-=======
     #print(repeated)
     #return parsed
->>>>>>> 15a32f15d6fcc1199246b330dbf8d68b67bda55f
-
     #final_data contains the JSON/dictionary that will be put into MongoDB
     final_data = {
         "song_name": None,
@@ -124,4 +120,5 @@ def parse_ssc_file(filename=None):
 
 
 parsed_ssc = parse_ssc_file('night.ssc')
+pprint("parsed_ssc below:")
 pprint(parsed_ssc)

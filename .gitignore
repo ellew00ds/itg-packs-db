@@ -165,4 +165,7 @@ dl/
 # No t.py
 t.py
 
+# No grab_ssc.py
+grab_ssc.py
+
 # End of https://www.gitignore.io/api/macos,python
