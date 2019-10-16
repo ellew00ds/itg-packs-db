@@ -165,11 +165,7 @@ dl/
 # No t.py
 t.py
 
-# No .ssc or .sm files
-*.ssc
-*.sm
-
-# No grab_ssc.py
-#grab_simfiles.py
+# No night.ssc
+night.ssc
 
 # End of https://www.gitignore.io/api/macos,python
