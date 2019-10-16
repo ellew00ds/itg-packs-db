@@ -1,8 +1,12 @@
 """
-parser.py - This shit parses .scc and .sm files to extract metadata
+parser.py - This parses .scc and .sm files to extract metadata
+
+TODO: add .sm parsing functionality
 """
+
 from pprint import pprint
 
+# TODO: document what these do
 EXCLUDED_KEYS = (
     'bpms',
     'steps',
@@ -22,12 +26,18 @@ REPEATED_KEYS = (
     'displaybpm',
     )
 
-
+"""
+This function parses a .ssc file, given a filename
+"""
 def parse_ssc_file(filename=None):
     with open(filename, "r") as fp:
         raw = fp.read()
     parsed = {}
     repeated = {}
+    """
+    Each "key" in the .ssc file is separated by a semicolon.
+    We use semicolons to delimit
+    """
     for value in raw.split(';'):
         value = value.strip('\r\n')
         if not value:
@@ -48,7 +58,7 @@ def parse_ssc_file(filename=None):
             parsed[k] = v
 
     repeated_parsed = [None for _ in list(repeated.values())[0]]
-    print("repeated_parsed:", repeated_parsed)
+    
     for k, v in repeated.items():
         for pos, val in enumerate(v):
             item = repeated_parsed[pos] or {}
@@ -62,14 +72,17 @@ def parse_ssc_file(filename=None):
             ), repeated_parsed)
         )
     parsed['sequences'] = repeated_parsed
-    #print(repeated)
-    #return parsed
-    #final_data contains the JSON/dictionary that will be put into MongoDB
+    
+    """
+    final_data is JSON/dictionary that will be loaded 
+    into MongoDB
+    """
     final_data = {
         "song_name": None,
         "song_artist": None,
         "bpm": None,
-        "pack_name": None,   # read_meta.py will be updated and eventually fill this in at the db_insert level
+        # read_meta.py will be updated and eventually fill this in at the db_insert level
+        "pack_name": None,
         "pack_link": None,
         "difficulty": {
             "Challenge": None,
@@ -80,6 +93,7 @@ def parse_ssc_file(filename=None):
             "Edit": None
         }
     }
+
     """
     Expected structure:
     {
@@ -95,34 +109,45 @@ def parse_ssc_file(filename=None):
         }
     }
     """
+
     final_data["song_name"] = parsed["title"]
     final_data["song_artist"] = parsed["artist"]
-    #cast to int and round
+    #TODO: cast bpm to int and round
     final_data["bpm"] = repeated["displaybpm"][0]
+
     """
-    ### ensuring BPM is correctly represented
+    ### TODO: ensure BPM is correctly represented
     bpm = repeated["displaybpm"][0]
     for i in repeated["displaybpm"]:
         if repeated["displaybpm"][i] != bpm:
             final_data["bpm"] = 'various'
     """
-    #there could be dupe difficulties. this assumes there are not.
+
+    """
+    # NOTE: there could be duplicated difficulties. 
+    This code assumes that there are not.
+    """
     num_diffs = len(repeated["difficulty"])
     i = 0
     while i < num_diffs:
         # Find the current difficulty in the array
         current_diff = repeated["difficulty"][i]
-        #Assign the respective meter value to that difficulty, in our final_data dictionary
+        # Assign the respective meter value to that difficulty, in our final_data dictionary
         final_data["difficulty"][current_diff]=repeated["meter"][i]
         i+=1
 
     return final_data
 
-
+"""
+# Run the parser
 parsed_ssc = parse_ssc_file('night.ssc')
-pprint("parsed_ssc below:")
-pprint(parsed_ssc)
 
-#parsed_sm = parse_ssc_file('When We Were Lovers.sm')
-#pprint("parsed_sm below:")
-#pprint(parsed_sm)
+# Test: print object to terminal
+pprint("parsed object:")
+pprint(parsed_ssc)
+"""
+
+# Test: see if parser automatically works for .sm files
+parsed_sm = parse_ssc_file('30MinutesHarder.sm')
+pprint("parsed_sm below:")
+pprint(parsed_sm)
