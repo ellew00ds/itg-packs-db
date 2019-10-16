@@ -122,3 +122,7 @@ def parse_ssc_file(filename=None):
 parsed_ssc = parse_ssc_file('night.ssc')
 pprint("parsed_ssc below:")
 pprint(parsed_ssc)
+
+parsed_sm = parse_ssc_file('When We Were Lovers.sm')
+pprint("parsed_sm below:")
+pprint(parsed_sm)
