@@ -3,7 +3,7 @@ parser.py - This parses .scc and .sm files to extract metadata
 
 TODO: add .sm parsing functionality
 """
-
+import os
 from pprint import pprint
 
 # TODO: document what these do
@@ -27,7 +27,33 @@ REPEATED_KEYS = (
     )
 
 """
+This function grabs the simfile from a directory. May or may not currently work
+"""
+def grab_simfiles(rootdir, path_array=[], simfile_array=[]):
+    for subdir, dirs, files in os.walk(rootdir):
+        path = subdir.split('/')
+        print("\n****** - Next Song Dir -", '*' * 50)
+        if len(path) > 2:
+            path_array.append(path)
+            for path in path_array:
+                #print(f"pack_name: {path[1]} -- song_name: {path[2]}")
+                pass
+
+        for file in files:
+            #print("os.path.join(subdir, file):", os.path.join(subdir, file))
+            if file.lower().endswith(('.ssc', '.sm')):
+                print(f"KICKASS BRO: '{file}' is a simfile")
+                simfile_array.append(os.path.join(subdir, file))
+                #print("simfile_array:", simfile_array)
+            else:
+                print(f"IGNORED: '{file}' is not a simfile")
+        print('*' * 75, '\n')
+    print("simfile_array at end of grab_simfiles():", simfile_array)
+    return simfile_array
+
+"""
 This function parses a .ssc file, given a filename
+TODO: document how this parser actually works
 """
 def parse_ssc_file(filename=None):
     with open(filename, "r") as fp:
@@ -42,11 +68,23 @@ def parse_ssc_file(filename=None):
         value = value.strip('\r\n')
         if not value:
             continue
+        """
+        Check if there are instances of values without keys, i.e. there are 2 colons in a row
+        if len(value.split(":")) > 2:
+            # print("Too many values to unpack in:", value)
+            # honestly not sure if this return should be in here, but keeping here for now for debugging
+            return
+        
+        else:
+        """
         k, v = value.split(':')
         if not v:
             continue
+        
 
         k = k.strip('#').lower()
+        # print("k:", k)
+        # print("value:", value)
         if k in EXCLUDED_KEYS:
             continue
         if k in REPEATED_KEYS:
@@ -72,7 +110,7 @@ def parse_ssc_file(filename=None):
             ), repeated_parsed)
         )
     parsed['sequences'] = repeated_parsed
-    
+       
     """
     final_data is JSON/dictionary that will be loaded 
     into MongoDB
@@ -138,16 +176,17 @@ def parse_ssc_file(filename=None):
 
     return final_data
 
-"""
+
 # Run the parser
 parsed_ssc = parse_ssc_file('night.ssc')
 
 # Test: print object to terminal
 pprint("parsed object:")
 pprint(parsed_ssc)
-"""
 
+"""
 # Test: see if parser automatically works for .sm files
 parsed_sm = parse_ssc_file('30MinutesHarder.sm')
 pprint("parsed_sm below:")
 pprint(parsed_sm)
+"""
