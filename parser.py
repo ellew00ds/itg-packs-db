@@ -69,15 +69,10 @@ def parse_ssc_file(filename=None):
         if not value:
             continue
         """
-        Check if there are instances of values without keys, i.e. there are 2 colons in a row
-        if len(value.split(":")) > 2:
-            # print("Too many values to unpack in:", value)
-            # honestly not sure if this return should be in here, but keeping here for now for debugging
-            return
-        
-        else:
+        Takes only the first k/v pair in a given semicolon grouping
+        In case there are instances of values without keys, i.e. there are 2 colons in a row
         """
-        k, v = value.split(':')
+        k, v = value.split(":")[:2]
         if not v:
             continue
         
@@ -150,8 +145,10 @@ def parse_ssc_file(filename=None):
 
     final_data["song_name"] = parsed["title"]
     final_data["song_artist"] = parsed["artist"]
-    # Cast BPM to int and round
-    final_data["bpm"] = int(float(repeated["displaybpm"][0]))
+    # Check to see if parser found a BPM
+    if 'displaybpm' in repeated:
+        # Cast BPM to int and round
+        final_data["bpm"] = int(float(repeated["displaybpm"][0]))
 
     """
     ### TODO: ensure BPM is correctly represented
