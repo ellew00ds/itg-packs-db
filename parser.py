@@ -162,14 +162,15 @@ def parse_ssc_file(filename=None):
     # NOTE: there could be duplicated difficulties. 
     This code assumes that there are not.
     """
-    num_diffs = len(repeated["difficulty"])
-    i = 0
-    while i < num_diffs:
-        # Find the current difficulty in the array
-        current_diff = repeated["difficulty"][i]
-        # Assign the respective meter value to that difficulty, in our final_data dictionary
-        final_data["difficulty"][current_diff]=repeated["meter"][i]
-        i+=1
+    if 'difficulty' in repeated:
+        num_diffs = len(repeated["difficulty"])
+        i = 0
+        while i < num_diffs:
+            # Find the current difficulty in the array
+            current_diff = repeated["difficulty"][i]
+            # Assign the respective meter value to that difficulty, in our final_data dictionary
+            final_data["difficulty"][current_diff]=repeated["meter"][i]
+            i+=1
 
     return final_data
 
@@ -178,12 +179,14 @@ def parse_ssc_file(filename=None):
 parsed_ssc = parse_ssc_file('night.ssc')
 
 # Test: print object to terminal
-pprint("parsed object:")
+print('')
+pprint("parsed_ssc object:")
 pprint(parsed_ssc)
+print('')
 
-"""
+
 # Test: see if parser automatically works for .sm files
 parsed_sm = parse_ssc_file('30MinutesHarder.sm')
-pprint("parsed_sm below:")
+pprint("parsed_sm object:")
 pprint(parsed_sm)
-"""
+print('')
