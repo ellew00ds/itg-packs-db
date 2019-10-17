@@ -150,8 +150,8 @@ def parse_ssc_file(filename=None):
 
     final_data["song_name"] = parsed["title"]
     final_data["song_artist"] = parsed["artist"]
-    #TODO: cast bpm to int and round
-    final_data["bpm"] = repeated["displaybpm"][0]
+    # Cast BPM to int and round
+    final_data["bpm"] = int(float(repeated["displaybpm"][0]))
 
     """
     ### TODO: ensure BPM is correctly represented
