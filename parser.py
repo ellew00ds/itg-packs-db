@@ -4,6 +4,7 @@ parser.py - This parses .scc and .sm files to extract metadata
 TODO: add .sm parsing functionality
 """
 import os
+import json
 from pprint import pprint
 
 # TODO: document what these do
@@ -174,19 +175,29 @@ def parse_ssc_file(filename=None):
 
     return final_data
 
-
-# Run the parser
+"""
+Test suite: Run the parser for multiple files
+TODO: move files into their own folder
+TODO: populate this into 'songinfo.json' instead of print to Terminal
+"""
 parsed_ssc = parse_ssc_file('night.ssc')
 
-# Test: print object to terminal
-print('')
-pprint("parsed_ssc object:")
-pprint(parsed_ssc)
-print('')
+# Print valid JSON object to terminal
+print('[')
+print(json.dumps(parsed_ssc))
+print(',')
 
+parsed_ssc = parse_ssc_file('tranoid.ssc')
+print('')
+print(json.dumps(parsed_ssc))
+print(',')
+parsed_ssc = parse_ssc_file('westworld.ssc')
+
+print('')
+print(json.dumps(parsed_ssc))
+print(',')
 
 # Test: see if parser automatically works for .sm files
 parsed_sm = parse_ssc_file('30MinutesHarder.sm')
-pprint("parsed_sm object:")
-pprint(parsed_sm)
-print('')
+print(json.dumps(parsed_sm))
+print(']')
