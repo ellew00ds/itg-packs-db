@@ -112,7 +112,8 @@ of the form {'%difficulty%' : '%level%'}
 """
 def create_difficulty_map(parsed, difficulty_config):
     if difficulty_config['key'] not in parsed or difficulty_config['value'] not in parsed:
-        raise Exception(f"keys {difficulty_config['key']} or {difficulty_config['value']} were not present in the SSC file")
+        # raise Exception(f"keys {difficulty_config['key']} or {difficulty_config['value']} were not present in the SSC file")
+        return {}
 
     keys = parsed.getall(difficulty_config['key'])
     values = parsed.getall(difficulty_config['value'])
