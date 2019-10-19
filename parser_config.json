@@ -1,0 +1,20 @@
+{
+  "mappings": {
+    "song_name": {
+      "type": "str",
+      "field": "title"
+    },
+    "song_artist": {
+      "type": "str",
+      "field": "artist"
+    },
+    "bpm": {
+      "type": "int",
+      "field": "displaybpm"
+    }
+  },
+  "difficulties": {
+  	"key": "difficulty",
+  	"value": "meter"
+  }
+}

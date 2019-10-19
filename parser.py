@@ -7,6 +7,19 @@ import os
 import json
 from pprint import pprint
 
+from multidict import MultiDict
+
+
+with open('parser_config.json', 'r') as config:
+    CONFIG = json.load(config)
+
+
+# mapping strings to python types
+STR_TO_TYPE = {
+    "str": str,
+    "int": lambda x: int(float(x)),
+}
+
 # TODO: document what these do
 EXCLUDED_KEYS = (
     'bpms',
@@ -16,15 +29,6 @@ EXCLUDED_KEYS = (
     'notes',
     'notedata',
     'chartname',
-    )
-REPEATED_KEYS = (
-    'stepstype',
-    'description',
-    'chartstyle',
-    'difficulty',
-    'meter',
-    'credit',
-    'displaybpm',
     )
 
 """
@@ -52,15 +56,14 @@ def grab_simfiles(rootdir, path_array=[], simfile_array=[]):
     print("simfile_array at end of grab_simfiles():", simfile_array)
     return simfile_array
 
+
 """
-This function parses a .ssc file, given a filename
-TODO: document how this parser actually works
+This function parses a .ssc file, given a filename, and deserializes it into a MultiDict
 """
-def parse_ssc_file(filename=None):
+def parse_ssc_file(filename):
     with open(filename, "r") as fp:
         raw = fp.read()
-    parsed = {}
-    repeated = {}
+    parsed = MultiDict()
     """
     Each "key" in the .ssc file is separated by a semicolon.
     We use semicolons to delimit
@@ -83,33 +86,62 @@ def parse_ssc_file(filename=None):
         # print("value:", value)
         if k in EXCLUDED_KEYS:
             continue
-        if k in REPEATED_KEYS:
-            if k not in repeated.keys():
-                repeated[k] = [v]
-            else:
-                repeated[k].append(v)
         else:
-            parsed[k] = v
+            parsed.add(k, v)
+    return parsed
 
-    repeated_parsed = [None for _ in list(repeated.values())[0]]
-    
-    for k, v in repeated.items():
-        for pos, val in enumerate(v):
-            item = repeated_parsed[pos] or {}
-            item[k] = val
-            repeated_parsed[pos] = item
 
-    repeated_parsed = list(
-        filter(
-            lambda x: all(
-                [key in x for key in repeated.keys()]
-            ), repeated_parsed)
-        )
-    parsed['sequences'] = repeated_parsed
-       
+"""
+Extract values out of a parsed MultiDict using the given mapping config.
+Returns a sequence of key, value tuples of the form field_name, field_value
+"""
+def map_parsed_multidict(parsed, mapping_config):
+    # returns the value at a certain key within parsed, and casts it to the appropriate type
+    def _map_and_cast(field, type):
+        return STR_TO_TYPE[type](parsed[field]) if field in parsed else None
+
+    # Call _map_and_cast with each mapping config, and filter out the None values
+    return filter(lambda x: x[1],
+                  map(lambda x: (x[0], _map_and_cast(**x[1])), mapping_config.items()))
+
+
+"""
+Given a parsed multidict and a difficulty_config with a "key" and "value" property
+corresponding to properties within the dict, build out a mapping
+of the form {'%difficulty%' : '%level%'}
+"""
+def create_difficulty_map(parsed, difficulty_config):
+    if difficulty_config['key'] not in parsed or difficulty_config['value'] not in parsed:
+        raise Exception(f"keys {difficulty_config['key']} or {difficulty_config['value']} were not present in the SSC file")
+
+    keys = parsed.getall(difficulty_config['key'])
+    values = parsed.getall(difficulty_config['value'])
+
+    if len(keys) != len(values):
+        raise Exception("Length mismatch in difficulties")
+
+    return dict(zip(keys, values))
+
+
+def process_ssc_file(filename):
+    # load the ssc file into a multidict and initialize the empty mapped object
+    parsed = parse_ssc_file(filename)
+    mapped = {}
+
+    # update the mapped object with the direct mappings specified in mapping_config
+    mapped.update(map_parsed_multidict(parsed, CONFIG["mappings"]))
+
+    # create a difficulty mapping of names to levels
+    mapped["difficulty"] = create_difficulty_map(parsed, CONFIG["difficulties"])
+
+    # todo: add a pack link
+
     """
     final_data is JSON/dictionary that will be loaded 
     into MongoDB
+    """
+    # NOTE: this is no longer the case; the JSON/dictionary to be loaded into mongodb will be
+    # the raw dictionary (post processing will be done within mongodb)
     """
     final_data = {
         "song_name": None,
@@ -127,6 +159,7 @@ def parse_ssc_file(filename=None):
             "Edit": None
         }
     }
+    """
 
     """
     Expected structure:
@@ -143,61 +176,32 @@ def parse_ssc_file(filename=None):
         }
     }
     """
+    return mapped
 
-    final_data["song_name"] = parsed["title"]
-    final_data["song_artist"] = parsed["artist"]
-    # Check to see if parser found a BPM
-    if 'displaybpm' in repeated:
-        # Cast BPM to int and round
-        final_data["bpm"] = int(float(repeated["displaybpm"][0]))
-
-    """
-    ### TODO: ensure BPM is correctly represented
-    bpm = repeated["displaybpm"][0]
-    for i in repeated["displaybpm"]:
-        if repeated["displaybpm"][i] != bpm:
-            final_data["bpm"] = 'various'
-    """
-
-    """
-    # NOTE: there could be duplicated difficulties. 
-    This code assumes that there are not.
-    """
-    if 'difficulty' in repeated:
-        num_diffs = len(repeated["difficulty"])
-        i = 0
-        while i < num_diffs:
-            # Find the current difficulty in the array
-            current_diff = repeated["difficulty"][i]
-            # Assign the respective meter value to that difficulty, in our final_data dictionary
-            final_data["difficulty"][current_diff]=repeated["meter"][i]
-            i+=1
-
-    return final_data
 
 """
 Test suite: Run the parser for multiple files
 TODO: move files into their own folder
 TODO: populate this into 'songinfo.json' instead of print to Terminal
 """
-parsed_ssc = parse_ssc_file('night.ssc')
+processed = process_ssc_file('night.ssc')
 
 # Print valid JSON object to terminal
 print('[')
-print(json.dumps(parsed_ssc))
+print(json.dumps(processed))
 print(',')
 
-parsed_ssc = parse_ssc_file('tranoid.ssc')
+processed = process_ssc_file('tranoid.ssc')
 print('')
-print(json.dumps(parsed_ssc))
+print(json.dumps(processed))
 print(',')
-parsed_ssc = parse_ssc_file('westworld.ssc')
+processed = process_ssc_file('westworld.ssc')
 
 print('')
-print(json.dumps(parsed_ssc))
+print(json.dumps(processed))
 print(',')
 
 # Test: see if parser automatically works for .sm files
-parsed_sm = parse_ssc_file('30MinutesHarder.sm')
+parsed_sm = process_ssc_file('30MinutesHarder.sm')
 print(json.dumps(parsed_sm))
 print(']')
