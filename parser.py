@@ -53,7 +53,7 @@ def grab_simfiles(rootdir, path_array=[], simfile_array=[]):
             else:
                 print(f"IGNORED: '{file}' is not a simfile")
         print('*' * 75, '\n')
-    print("simfile_array at end of grab_simfiles():", simfile_array)
+    #print("simfile_array at end of grab_simfiles():", simfile_array)
     return simfile_array
 
 
@@ -79,7 +79,6 @@ def parse_ssc_file(filename):
         k, v = value.split(":")[:2]
         if not v:
             continue
-        
 
         k = k.strip('#').lower()
         # print("k:", k)
@@ -206,3 +205,12 @@ print(',')
 parsed_sm = process_ssc_file('30MinutesHarder.sm')
 print(json.dumps(parsed_sm))
 print(']')
+
+# Test: see if parser can handle directories of simfiles
+# Get the simfile_array
+simfile_array = grab_simfiles(rootdir='packs')
+
+for simfile in simfile_array:
+    parsed_ssc = process_ssc_file(simfile)
+    print("parsed_ssc:")
+    print(json.dumps(parsed_ssc))
