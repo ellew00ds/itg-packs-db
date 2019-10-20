@@ -37,23 +37,14 @@ This function grabs the simfile from a directory. May or may not currently work
 def grab_simfiles(rootdir, path_array=[], simfile_array=[]):
     for subdir, dirs, files in os.walk(rootdir):
         path = subdir.split('/')
-        print("\n****** - Next Song Dir -", '*' * 50)
         if len(path) > 2:
             path_array.append(path)
             for path in path_array:
-                #print(f"pack_name: {path[1]} -- song_name: {path[2]}")
                 pass
-
         for file in files:
             #print("os.path.join(subdir, file):", os.path.join(subdir, file))
             if file.lower().endswith(('.ssc', '.sm')):
-                print(f"KICKASS BRO: '{file}' is a simfile")
                 simfile_array.append(os.path.join(subdir, file))
-                #print("simfile_array:", simfile_array)
-            else:
-                print(f"IGNORED: '{file}' is not a simfile")
-        print('*' * 75, '\n')
-    #print("simfile_array at end of grab_simfiles():", simfile_array)
     return simfile_array
 
 
@@ -180,37 +171,26 @@ def process_ssc_file(filename):
 
 
 """
-Test suite: Run the parser for multiple files
-TODO: move files into their own folder
-TODO: populate this into 'songinfo.json' instead of print to Terminal
+Test suite: Output processed results to a .json file
+TODO: Make this file valid json. the current parser throws in weird characters
+that prevent the file from being valid json
 """
-processed = process_ssc_file('night.ssc')
-
-# Print valid JSON object to terminal
-print('[')
-print(json.dumps(processed))
-print(',')
-
-processed = process_ssc_file('tranoid.ssc')
-print('')
-print(json.dumps(processed))
-print(',')
-processed = process_ssc_file('westworld.ssc')
-
-print('')
-print(json.dumps(processed))
-print(',')
-
-# Test: see if parser automatically works for .sm files
-parsed_sm = process_ssc_file('30MinutesHarder.sm')
-print(json.dumps(parsed_sm))
-print(']')
-
-# Test: see if parser can handle directories of simfiles
+# Test if parser can handle directories of simfiles
 # Get the simfile_array
 simfile_array = grab_simfiles(rootdir='packs')
+# Creates an out.json file for the output
+os.remove("out.json")
+f = open('out.json','w')
+f.write('[')
 
 for simfile in simfile_array:
     parsed_ssc = process_ssc_file(simfile)
-    print("parsed_ssc:")
-    print(json.dumps(parsed_ssc))
+    f.write(json.dumps(parsed_ssc))
+    f.write(',')
+
+# TODO: Make this work to Remove the final comma from file afeter loop
+with open('out.json', 'rb+') as filehandle:
+    filehandle.seek(-1, os.SEEK_END)
+    filehandle.truncate()
+
+f.write(']')
