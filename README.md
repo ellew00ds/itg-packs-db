@@ -1,39 +1,60 @@
 # In The Groove Packs Database
-Source code for In The Groove packs database, containing song information by pack
+Source code for In The Groove packs database, containing song information by pack. [This site can be used](https://search.stepmaniaonline.net/) as inspiration.
 
-This is currently a non-working project. [This can be used](https://search.stepmaniaonline.net/) as inspiration.
+## Installing
+From the Terminal, clone this repo onto your computer with:
 
-### Prerequesites
-TBD
+```
+git clone https://github.com/lewisisgood/itg-packs-db
+```
 
-### Steps to completion
+Move into the new directory:
+
+```
+cd itg-packs-db/
+```
+
+Run the parser on a `packs` directory:
+```
+python3 parser.py
+```
+
+## Steps to project completion
 
 * Manually download all packs in `spreadsheet` to one of the hard drives on `the server`
 	* These are a mix of GDrive, Dropbox, etc. links
 
 * Unzip packs
 
-* Determine where and how metadata is stored for artist name, step difficulties, etc.
+* Run parser on all packs
 
-* Create a [FaunaDB instance](https://dashboard.fauna.com/)
+* Load each song as a single record in one cloud database
 
-* Each song will be a record in a single database
+* Create front-end for database using React
 
-* Keys will be:
-	* song_name
-	* song_artist
-	* song_link
-	* pack_name
-	* difficulty/num_feet (for now, a JSON blob)
-
+Document structure:
+```json
+{
+    "song_name": "Dream a Dream",
+    "song_artist": "Captain Jack",
+    "bpm": "120",
+    "pack_name": "DDR MAX 2",
+    "pack_link": "drive.google.com/heyohcaptainjack",
+    "difficulty": {
+        "light": "3",
+        "standard": "5",
+        "heavy": "7"
+    }
+}
+```
 
 ## Built With
 
 * Python 3
-* FaunaDB
-* Flask
+* [FaunaDB](https://fauna.com/)
 
 ## Contributors
 
 * **Lewis King** - [Github](https://github.com/lewisisgood)
 * **Chandler Wyatt** - [Github](https://github.com/chandlerwyatt)
+* **Gene Peters** - [Github](https://github.com/gene-telligent)

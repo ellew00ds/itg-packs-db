@@ -1,7 +1,5 @@
 """
 parser.py - This parses .scc and .sm files to extract metadata
-
-TODO: add .sm parsing functionality
 """
 import os
 import json
