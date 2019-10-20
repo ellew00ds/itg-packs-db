@@ -1,3 +1,9 @@
+"""
+read_meta.py - This attempts to extract metadata from the 
+file level, and perform db insert.
+TODO: Complete functionality and remove steps deprecated by parser.py
+"""
+
 import os
 from mongo import make_mongo_client
 from pymongo.errors import DuplicateKeyError

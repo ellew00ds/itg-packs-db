@@ -165,7 +165,7 @@ dl/
 # No t.py
 t.py
 
-# No night.ssc
-night.ssc
+# No songinfo.json
+songinfo.json
 
 # End of https://www.gitignore.io/api/macos,python
