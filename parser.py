@@ -125,30 +125,6 @@ def process_ssc_file(filename):
 
     # todo: add a pack link
 
-    """
-    final_data is JSON/dictionary that will be loaded 
-    into MongoDB
-    """
-    # NOTE: this is no longer the case; the JSON/dictionary to be loaded into mongodb will be
-    # the raw dictionary (post processing will be done within mongodb)
-    """
-    final_data = {
-        "song_name": None,
-        "song_artist": None,
-        "bpm": None,
-        # read_meta.py will be updated and eventually fill this in at the db_insert level
-        "pack_name": None,
-        "pack_link": None,
-        "difficulty": {
-            "Challenge": None,
-            "Hard": None,
-            "Medium": None,
-            "Easy": None,
-            "Beginner": None,
-            "Edit": None
-        }
-    }
-    """
 
     """
     Expected structure:
@@ -176,19 +152,16 @@ that prevent the file from being valid json
 # Test if parser can handle directories of simfiles
 # Get the simfile_array
 simfile_array = grab_simfiles(rootdir='packs')
-# Creates an out.json file for the output
-os.remove("out.json")
-f = open('out.json','w')
-f.write('[')
+
+final_dict = []
 
 for simfile in simfile_array:
     parsed_ssc = process_ssc_file(simfile)
-    f.write(json.dumps(parsed_ssc))
-    f.write(',')
+    final_dict.append(parsed_ssc)
 
-# TODO: Make this work to Remove the final comma from file afeter loop
-with open('out.json', 'rb+') as filehandle:
-    filehandle.seek(-1, os.SEEK_END)
-    filehandle.truncate()
+# Creates a .json file for the output. Assumes an existing file is there.
+os.remove("songinfo.json")
 
-f.write(']')
+with open('songinfo.json', 'w') as filehandle:
+    for listitem in final_dict:
+        filehandle.write("%s" % listitem)
