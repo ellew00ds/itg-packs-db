@@ -153,15 +153,14 @@ that prevent the file from being valid json
 # Get the simfile_array
 simfile_array = grab_simfiles(rootdir='packs')
 
-final_dict = []
+final_file = []
 
 for simfile in simfile_array:
     parsed_ssc = process_ssc_file(simfile)
-    final_dict.append(parsed_ssc)
+    final_file.append(parsed_ssc)
 
 # Creates a .json file for the output. Assumes an existing file is there.
 os.remove("songinfo.json")
 
 with open('songinfo.json', 'w') as filehandle:
-    for listitem in final_dict:
-        filehandle.write("%s" % listitem)
+    json.dump(final_file, filehandle)
