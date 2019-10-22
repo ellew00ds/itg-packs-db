@@ -30,7 +30,7 @@ EXCLUDED_KEYS = (
     )
 
 """
-This function grabs the simfile from a directory. May or may not currently work
+This function grabs simfiles from a directory.
 """
 def grab_simfiles(rootdir, path_array=[], simfile_array=[]):
     for subdir, dirs, files in os.walk(rootdir):
@@ -118,13 +118,21 @@ def process_ssc_file(filename):
     mapped = {}
 
     # update the mapped object with the direct mappings specified in mapping_config
-    mapped.update(map_parsed_multidict(parsed, CONFIG["mappings"]))
+    mapped.update(map_parsed_multidict(parsed, CONFIG["mappings"]))    
 
     # create a difficulty mapping of names to levels
     mapped["difficulty"] = create_difficulty_map(parsed, CONFIG["difficulties"])
 
-    # todo: add a pack link
+    # pull difficulties/bpm in title into the difficulty mapping and reformat title
+    # e.g. song_name = '[13] [175] Crossroad'
+    if "song_name" in mapped:
+        if mapped["song_name"].startswith("["):
+            song_name = mapped["song_name"]
+            mapped["difficulty"]["Challenge"] = song_name.split('] ')[0][1:]
+            mapped["bpm"] = song_name.split('] ')[1][1:]
+            mapped["song_name"] = song_name.split('] ')[2]
 
+    # todo: add a pack link
 
     """
     Expected structure:
