@@ -1,5 +1,6 @@
 """
 parser.py - This parses .scc and .sm files to extract metadata
+TODO: Run linter
 """
 import os
 import json
@@ -42,6 +43,7 @@ def grab_simfiles(rootdir, path_array=[], simfile_array=[]):
         for file in files:
             #print("os.path.join(subdir, file):", os.path.join(subdir, file))
             if file.lower().endswith(('.ssc', '.sm')):
+                # TODO: Add back in only picking out the .ssc if both are found
                 simfile_array.append(os.path.join(subdir, file))
     return simfile_array
 
@@ -172,13 +174,17 @@ simfile_array = grab_simfiles(rootdir='packs')
 
 final_file = []
 
+# Run test for single file
+"""
 parsed_ssc = process_ssc_file('packs/dimo/nail gun/nail gun.ssc')
 final_file.append(parsed_ssc)
 """
+
+# Run test for folders of packs
 for simfile in simfile_array:
     parsed_ssc = process_ssc_file(simfile)
     final_file.append(parsed_ssc)
-"""
+
 
 # Creates a .json file for the output. Assumes an existing file is there.
 os.remove("songinfo.json")
