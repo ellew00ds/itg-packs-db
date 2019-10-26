@@ -115,6 +115,7 @@ def create_difficulty_map(parsed, difficulty_config):
 def process_ssc_file(filename):
     # load the ssc file into a multidict and initialize the empty mapped object
     parsed = parse_ssc_file(filename)
+    #pprint(parsed)
     mapped = {}
 
     # update the mapped object with the direct mappings specified in mapping_config
@@ -123,8 +124,16 @@ def process_ssc_file(filename):
     # create a difficulty mapping of names to levels
     mapped["difficulty"] = create_difficulty_map(parsed, CONFIG["difficulties"])
 
+    """
+    TODO: correct for strange '#title' key in 'parsed'
+    MultiDict does not seem to take kindly to asking for #title even though it has it
+    For now, just pulls the name of the audio file as the title
+    """
+    if "title" not in parsed:
+        mapped["song_name"] = parsed["music"].split('.')[0]
+    
     # pull difficulties/bpm in title into the difficulty mapping and reformat title
-    # e.g. song_name = '[13] [175] Crossroad'
+    # e.g. song_name = '[14] [175] Crossroad'
     if "song_name" in mapped:
         if mapped["song_name"].startswith("["):
             song_name = mapped["song_name"]
@@ -163,9 +172,13 @@ simfile_array = grab_simfiles(rootdir='packs')
 
 final_file = []
 
+parsed_ssc = process_ssc_file('packs/dimo/nail gun/nail gun.ssc')
+final_file.append(parsed_ssc)
+"""
 for simfile in simfile_array:
     parsed_ssc = process_ssc_file(simfile)
     final_file.append(parsed_ssc)
+"""
 
 # Creates a .json file for the output. Assumes an existing file is there.
 os.remove("songinfo.json")
