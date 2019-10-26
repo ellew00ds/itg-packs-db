@@ -126,6 +126,10 @@ def process_ssc_file(filename):
     # create a difficulty mapping of names to levels
     mapped["difficulty"] = create_difficulty_map(parsed, CONFIG["difficulties"])
 
+    # add in pack_name
+    #print(f"Pack name: {filename.split('/')[1]}")
+    mapped["pack_name"] = filename.split('/')[1]
+
     """
     TODO: correct for strange '#title' key in 'parsed'
     MultiDict does not seem to take kindly to asking for #title even though it has it
