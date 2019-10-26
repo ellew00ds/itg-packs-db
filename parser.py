@@ -186,8 +186,12 @@ final_file.append(parsed_ssc)
 
 # Run test for folders of packs
 for simfile in simfile_array:
-    parsed_ssc = process_ssc_file(simfile)
-    final_file.append(parsed_ssc)
+    # If the current simfile is a .sm and an equivalent .ssc file exists, do nothing
+    if simfile.endswith('.sm') and f"{simfile.strip('.sm')}.ssc" in simfile_array:
+        print(f".sm and .ssc files exist for simfile: {simfile.strip('.sm')}. Skipping .sm file")
+    else:
+        parsed_ssc = process_ssc_file(simfile)
+        final_file.append(parsed_ssc)
 
 
 # Creates a .json file for the output. Assumes an existing file is there.
