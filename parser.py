@@ -56,7 +56,7 @@ def grab_simfiles(rootdir, path_array=[], simfile_array=[]):
             for path in path_array:
                 pass
         for file in files:
-            if file.lower().endswith(('.ssc', '.sm')):
+            if file.lower().endswith(('.ssc', '.sm', '.dwi')):
                 simfile_array.append(os.path.join(subdir, file))
     return simfile_array
 
