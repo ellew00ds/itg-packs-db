@@ -1,7 +1,23 @@
 """
 parser.py - This parses .scc and .sm files to extract metadata
+
+Expected structure of JSON output:
+{
+    "song_name": "Dream a Dream",
+    "song_artist": "Captain Jack",
+    "bpm": "120",
+    "pack_name": "DDR MAX 2",
+    "pack_link": "drive.google.com/onemoretimeimbackwithanewrhyme",
+    "difficulty": {
+        "light": "3",
+        "standard": "5",
+        "heavy": "7"
+    }
+}
+
 TODO: Run linter
 """
+
 import os
 import json
 from pprint import pprint
@@ -19,9 +35,8 @@ STR_TO_TYPE = {
     "int": lambda x: int(float(x)),
 }
 
-# TODO: document what these do
+# Exclude data fields we don't care to track
 EXCLUDED_KEYS = (
-    'bpms',
     'steps',
     'stops',
     'radarvalues',
@@ -41,9 +56,7 @@ def grab_simfiles(rootdir, path_array=[], simfile_array=[]):
             for path in path_array:
                 pass
         for file in files:
-            #print("os.path.join(subdir, file):", os.path.join(subdir, file))
             if file.lower().endswith(('.ssc', '.sm')):
-                # TODO: Add back in only picking out the .ssc if both are found
                 simfile_array.append(os.path.join(subdir, file))
     return simfile_array
 
@@ -72,8 +85,6 @@ def parse_ssc_file(filename):
             continue
 
         k = k.strip('#').lower()
-        # print("k:", k)
-        # print("value:", value)
         if k in EXCLUDED_KEYS:
             continue
         else:
@@ -113,11 +124,14 @@ def create_difficulty_map(parsed, difficulty_config):
 
     return dict(zip(keys, values))
 
+"""
+Given a filename, run the helper functions and perform formatting on fields
 
+TODO: Refactor such that the value formatting happ[ens before mapping occurs
+"""
 def process_ssc_file(filename):
     # load the ssc file into a multidict and initialize the empty mapped object
     parsed = parse_ssc_file(filename)
-    #pprint(parsed)
     mapped = {}
 
     # update the mapped object with the direct mappings specified in mapping_config
@@ -127,7 +141,6 @@ def process_ssc_file(filename):
     mapped["difficulty"] = create_difficulty_map(parsed, CONFIG["difficulties"])
 
     # add in pack_name
-    #print(f"Pack name: {filename.split('/')[1]}")
     mapped["pack_name"] = filename.split('/')[1]
 
     """
@@ -147,32 +160,17 @@ def process_ssc_file(filename):
             mapped["bpm"] = song_name.split('] ')[1][1:]
             mapped["song_name"] = song_name.split('] ')[2]
 
-    # todo: add a pack link
+    # pull in bpm from bpms if displaybpm not given in file
+    if "bpm" not in parsed and "bpms" in parsed:
+        mapped["bpm"] = int(float(parsed["bpms"].split(",")[0].split("=")[1]))
 
-    """
-    Expected structure:
-    {
-        "song_name": "Dream a Dream",
-        "song_artist": "Captain Jack",
-        "bpm": "120",
-        "pack_name": "DDR MAX 2",
-        "pack_link": "drive.google.com/onemoretimeimbackwithanewrhyme",
-        "difficulty": {
-            "light": "3",
-            "standard": "5",
-            "heavy": "7"
-        }
-    }
-    """
     return mapped
 
 
 """
 Test suite: Output processed results to a .json file
-TODO: Make this file valid json. the current parser throws in weird characters
-that prevent the file from being valid json
+TODO: Make an actual test suite
 """
-# Test if parser can handle directories of simfiles
 # Get the simfile_array
 simfile_array = grab_simfiles(rootdir='packs')
 
@@ -188,7 +186,7 @@ final_file.append(parsed_ssc)
 for simfile in simfile_array:
     # If the current simfile is a .sm and an equivalent .ssc file exists, do nothing
     if simfile.endswith('.sm') and f"{simfile.strip('.sm')}.ssc" in simfile_array:
-        print(f".sm and .ssc files exist for simfile: {simfile.strip('.sm')}. Skipping .sm file")
+        pass
     else:
         parsed_ssc = process_ssc_file(simfile)
         final_file.append(parsed_ssc)
