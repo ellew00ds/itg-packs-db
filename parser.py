@@ -32,9 +32,8 @@ with open('parser_config.json', 'r') as config:
 # mapping strings to python types
 STR_TO_TYPE = {
     "str": str,
-    # mapping fails when displaybpm like '35..140'
-    "int": str,
-    # "int": lambda x: int(float(x)),
+    # STR_TO_TYPE fails when displaybpm like '35..140'
+    "int": lambda x: int(float(x)),
 }
 
 # Exclude data fields we don't care to track
@@ -65,6 +64,7 @@ def grab_simfiles(rootdir, path_array=[], simfile_array=[]):
 """
 This function parses a .ssc file, given a filename, and deserializes it into a MultiDict
 """
+# TODO: change to parse_file
 def parse_ssc_file(filename):
     with open(filename, "r") as fp:
         raw = fp.read()
@@ -81,7 +81,7 @@ def parse_ssc_file(filename):
         Takes only the first k/v pair in a given semicolon grouping
         In case there are instances of values without keys, i.e. there are 2 colons in a row
         """
-        k, v = value.split(":")[:2]
+        k, v = value.split(":", 1)
         if not v:
             continue
 
@@ -111,24 +111,39 @@ def map_parsed_multidict(parsed, mapping_config):
 Given a parsed multidict and a difficulty_config with a "key" and "value" property
 corresponding to properties within the dict, build out a mapping
 of the form {'%difficulty%' : '%level%'}
+TODO: delete diff configs
 """
-def create_difficulty_map(parsed, difficulty_config):
-    if difficulty_config['key'] not in parsed or difficulty_config['value'] not in parsed:
-        # raise Exception(f"keys {difficulty_config['key']} or {difficulty_config['value']} were not present in the SSC file")
-        return {}
+def create_difficulty_map_ssc(parsed):
+    # lambda functions lowercase everything in the list
+    difficulties = map(lambda x: x.lower(), parsed.getall('difficulty'))
+    meters = parsed.getall('meter')
 
-    keys = parsed.getall(difficulty_config['key'])
-    values = parsed.getall(difficulty_config['value'])
-
-    if len(keys) != len(values):
+    if len(difficulties) != len(meters):
         raise Exception("Length mismatch in difficulties")
 
-    return dict(zip(keys, values))
+    return dict(zip(difficulties, meters))
+
+"""
+Given a parsed multidict with a "key" and "value" property
+corresponding to properties within the dict, build out a mapping
+of the form {'%difficulty%' : '%level%'}
+'ANOTHER:5:00000...'
+"""
+def create_difficulty_map_dwi(parsed):
+    single_difficulties = parsed.getall('single')
+    parsed_difficulties = {}
+
+    for item in single_difficulties:
+        difficulty, level, _ = item.split(':')
+        parsed_difficulties[difficulty.lower()] = int(level)
+
+    return parsed_difficulties
+
 
 """
 Given a filename, run the helper functions and perform formatting on fields
 
-TODO: Refactor such that the value formatting happ[ens before mapping occurs
+TODO: Refactor such that the value formatting happens before mapping occurs
 """
 def process_ssc_file(filename):
     # load the ssc file into a multidict and initialize the empty mapped object
@@ -138,8 +153,11 @@ def process_ssc_file(filename):
     # update the mapped object with the direct mappings specified in mapping_config
     mapped.update(map_parsed_multidict(parsed, CONFIG["mappings"]))
 
-    # create a difficulty mapping of names to levels
-    mapped["difficulty"] = create_difficulty_map(parsed, CONFIG["difficulties"])
+    # create a difficulty mapping of names to levels for ssc files
+    if filename.endswith('.ssc'):
+        mapped["difficulty"] = create_difficulty_map_ssc(parsed)
+    elif filename.endswith('.dwi'): 
+        mapped["difficulty"] = create_difficulty_map_dwi(parsed)
 
     # add in pack_name
     mapped["pack_name"] = filename.split('/')[1]
@@ -165,10 +183,12 @@ def process_ssc_file(filename):
     if "bpm" not in parsed and "bpms" in parsed:
         mapped["bpm"] = int(float(parsed["bpms"].split(",")[0].split("=")[1]))
 
+    """
     # fill in missing difficulty map for .sm and .dwi files
     if mapped["difficulty"] == {}:
         possible_diff_array = ['beginner', 'basic', 'another', 'maniac', 'light',
                                'standard', 'heavy', 'challenge', 'oni']
+        pprint(parsed)
         if filename.endswith('.dwi'):
             with open(filename, "r") as fp:
                 raw = fp.read()
@@ -184,7 +204,8 @@ def process_ssc_file(filename):
                 if parsed["notes"].split(':')[1] == 'dance-single':
                     new_key = parsed["notes"].split(':')[3]
                     mapped["difficulty"][new_key] = parsed["notes"].split(':')[4]
-
+    """
+    
     return mapped
 
 

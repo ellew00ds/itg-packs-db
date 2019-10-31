@@ -9,12 +9,8 @@
       "field": "artist"
     },
     "bpm": {
-      "type": "int",
+      "type": "str",
       "field": "displaybpm"
     }
-  },
-  "difficulties": {
-  	"key": "difficulty",
-  	"value": "meter"
   }
 }
