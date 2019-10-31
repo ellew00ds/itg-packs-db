@@ -32,7 +32,9 @@ with open('parser_config.json', 'r') as config:
 # mapping strings to python types
 STR_TO_TYPE = {
     "str": str,
-    "int": lambda x: int(float(x)),
+    # mapping fails when displaybpm like '35..140'
+    "int": str,
+    # "int": lambda x: int(float(x)),
 }
 
 # Exclude data fields we don't care to track
@@ -40,7 +42,6 @@ EXCLUDED_KEYS = (
     'steps',
     'stops',
     'radarvalues',
-    'notes',
     'notedata',
     'chartname',
     )
@@ -135,7 +136,7 @@ def process_ssc_file(filename):
     mapped = {}
 
     # update the mapped object with the direct mappings specified in mapping_config
-    mapped.update(map_parsed_multidict(parsed, CONFIG["mappings"]))    
+    mapped.update(map_parsed_multidict(parsed, CONFIG["mappings"]))
 
     # create a difficulty mapping of names to levels
     mapped["difficulty"] = create_difficulty_map(parsed, CONFIG["difficulties"])
@@ -150,7 +151,7 @@ def process_ssc_file(filename):
     """
     if "title" not in parsed:
         mapped["song_name"] = parsed["music"].split('.')[0]
-    
+
     # pull difficulties/bpm in title into the difficulty mapping and reformat title
     # e.g. song_name = '[14] [175] Crossroad'
     if "song_name" in mapped:
@@ -163,6 +164,26 @@ def process_ssc_file(filename):
     # pull in bpm from bpms if displaybpm not given in file
     if "bpm" not in parsed and "bpms" in parsed:
         mapped["bpm"] = int(float(parsed["bpms"].split(",")[0].split("=")[1]))
+
+    # fill in missing difficulty map for .sm and .dwi files
+    if mapped["difficulty"] == {}:
+        possible_diff_array = ['beginner', 'basic', 'another', 'maniac', 'light',
+                               'standard', 'heavy', 'challenge', 'oni']
+        if filename.endswith('.dwi'):
+            with open(filename, "r") as fp:
+                raw = fp.read()
+            for item in raw.split(';'):
+                # TODO: Make this work
+                if item.startswith('#SINGLE'):
+                    if item.split('\n').split(':')[1].lower() in possible_diff_array:
+                        new_key = item.split(':')[1]
+                        mapped["difficulty"][new_key] = item.split(':')[2]
+        if filename.endswith('.sm'):
+            # TODO: Make this work
+            if "notes" in parsed:
+                if parsed["notes"].split(':')[1] == 'dance-single':
+                    new_key = parsed["notes"].split(':')[3]
+                    mapped["difficulty"][new_key] = parsed["notes"].split(':')[4]
 
     return mapped
 
