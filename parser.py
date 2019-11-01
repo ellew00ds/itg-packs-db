@@ -36,15 +36,6 @@ STR_TO_TYPE = {
     "int": lambda x: int(float(x)),
 }
 
-# Exclude data fields we don't care to track
-EXCLUDED_KEYS = (
-    'steps',
-    'stops',
-    'radarvalues',
-    'notedata',
-    'chartname',
-    )
-
 """
 This function grabs simfiles from a directory.
 """
@@ -205,7 +196,7 @@ def process_ssc_file(filename):
                     new_key = parsed["notes"].split(':')[3]
                     mapped["difficulty"][new_key] = parsed["notes"].split(':')[4]
     """
-    
+
     return mapped
 
 
@@ -224,6 +215,8 @@ parsed_ssc = process_ssc_file('packs/dimo/nail gun/nail gun.ssc')
 final_file.append(parsed_ssc)
 """
 
+
+
 # Run test for folders of packs
 for simfile in simfile_array:
     # If the current simfile is a .sm and an equivalent .ssc file exists, do nothing
@@ -232,6 +225,7 @@ for simfile in simfile_array:
     else:
         parsed_ssc = process_ssc_file(simfile)
         final_file.append(parsed_ssc)
+
 
 
 # Creates a .json file for the output. Assumes an existing file is there.
