@@ -217,8 +217,7 @@ class Pack:
         # iterdir returns a list of all subfiles in a particular directory, in one level
         # list of the name ...
         songfiles = [SongFiles.from_path(p) for p in path.iterdir() if p.is_dir()]
-
-
+        
         name = path.name
 
         return cls(name, path, songfiles)
@@ -230,3 +229,18 @@ class Pack:
             filename=highest_priority,
             pack_name=self.name,
             pack_link=None)
+
+class Loader(object):
+    """docstring for Loader"""
+    def load(self, songs):
+        pass
+
+class MongoLoader(Loader):
+    """docstring for MongoLoader"""
+    def load(self, songs):
+        pass
+
+class FaunaDBLoader(Loader):
+    """docstring for FaunaDBLoader"""
+    def load(self, songs):
+        pass
