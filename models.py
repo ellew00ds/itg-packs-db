@@ -23,6 +23,16 @@ class Song:
         self.pack_link = pack_link
         self.difficulty = difficulty
 
+    def __str__(self):
+        # This formats a string for displaying song; {} is a wildcard
+        return '<Song {} - {}: ({} @ {})>'.format(self.artist, self.name, self.pack_name, hex(id(self)))
+
+
+    def __repr__(self):
+        # This formats the interal 'representation' for displaying song; {} is a wildcard
+        # For in the REPL, as opposed to calling print or str on something
+        return self.__str__()
+
     def to_dict(self):
         return {
             'song_name': self.name,
@@ -40,6 +50,11 @@ class Song:
 class ParsedMultiDict(MultiDict):
     @classmethod
     def load(cls, filename):
+        """Loads k/v pair formatted file into a multidict.
+
+        @classmethod uses a passed class, in this case returns a configured instance
+        TODO: learn how this works
+        """
         with open(filename, "r") as fp:
             raw = fp.read()
         parsed = cls()
@@ -73,7 +88,7 @@ class Parser(object):
 
     def get_bpm(self, multidict):
         ''' special handling for bpm here'''
-        return multidict.getone('bpm', None)
+        return multidict.get('bpm')
 
     def get_difficulty(self, multidict):
         raise NotImplementedError
@@ -199,7 +214,10 @@ class Pack:
         if not path.is_dir():
             raise ValueError('Must be passed a directory of a pack rather than a file')
 
+        # iterdir returns a list of all subfiles in a particular directory, in one level
+        # list of the name ...
         songfiles = [SongFiles.from_path(p) for p in path.iterdir() if p.is_dir()]
+
 
         name = path.name
 
