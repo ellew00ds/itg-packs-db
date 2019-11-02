@@ -77,10 +77,7 @@ def parse_ssc_file(filename):
             continue
 
         k = k.strip('#').lower()
-        if k in EXCLUDED_KEYS:
-            continue
-        else:
-            parsed.add(k, v)
+        parsed.add(k, v)
     return parsed
 
 
@@ -229,7 +226,8 @@ for simfile in simfile_array:
 
 
 # Creates a .json file for the output. Assumes an existing file is there.
-os.remove("songinfo.json")
+if os.path.exists("songinfo.json"):
+    os.remove("songinfo.json")
 
 with open('songinfo.json', 'w') as filehandle:
     json.dump(final_file, filehandle)
