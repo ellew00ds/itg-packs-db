@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import List, Union
 import re
+import logging
 
 from multidict import MultiDict
 
@@ -57,26 +58,36 @@ class ParsedMultiDict(MultiDict):
         TODO: learn how this works
         """
         with open(filename, "r") as fp:
-            raw = re.sub(r'\/\/.*$', '', fp.read(), flags=re.MULTILINE)
-        
+            raw = fp.read()
+
+        raw = re.sub(r'\/\/.*$', '', raw, flags=re.MULTILINE)
+
+        # if a BOM is present, ignore it
+        if raw.startswith('\ufeff'):
+            raw = raw[1:]
+
         parsed = cls()
         """
         Each "key" in the file is separated by a semicolon.
         We use semicolons to delimit
         """
         for value in raw.split(';'):
-            value = value.strip('\n')
+            value = value.strip('\n').strip()
             if not value:
                 continue
             """
             Takes only the first k/v pair in a given semicolon grouping
             In case there are instances of values without keys, i.e. there are 2 colons in a row
             """
-            k, v = value.split(":", 1)
+            try:
+                k, v = value.split(":", 1)
+            except ValueError:
+                from pdb import set_trace
+                set_trace()
             if not v:
                 continue
 
-            k = k.strip('#').lower()
+            k = k.strip().strip('\n').strip('#').lower()
             parsed.add(k, v)
         return parsed
 
@@ -153,7 +164,7 @@ EXTENSIONS_TO_PARSER_MAP = {
 
 def get_priority_for_filename(filename):
     for extension, priority in PRIORITIES.items():
-        if filename.suffix == extension:
+        if filename.suffix.lower() == extension:
             return priority
     else:
         raise ValueError('Improper filename {}. should be one of: {}'.format(filename, set(PRIORITIES.keys())))
@@ -162,6 +173,8 @@ def get_priority_for_filename(filename):
 # given fizz.dwi, bar.sm, will return bar.sm
 # given fizz.dwi, buzz.dwi, will return an arbitary one
 def get_highest_priority_filename(filenames):
+    if len(filenames) == 0:
+        return None
     return sorted(filenames, key=get_priority_for_filename, reverse=True)[0]
 
 
@@ -185,9 +198,9 @@ class SongFiles:
         path = path.resolve()
 
         if not path.is_dir():
-            raise ValueError('Must be passed a directory of a pack rather than a file')
+            raise ValueError('Must be passed a directory of a song rather than a file: {}'.format(path))
 
-        simfiles = list(filter(lambda x: x.is_file() and x.suffix.endswith(FILE_SUFFIXES),
+        simfiles = list(filter(lambda x: x.is_file() and x.suffix.lower().endswith(FILE_SUFFIXES),
                         path.rglob('*.*')))
 
         name = path.name.lower()
@@ -203,7 +216,7 @@ class Pack:
         self.name = name
         self.path = path
         self.songfiles = songfiles
-        self.songs = [self.build_song(s) for s in self.songfiles]
+        self.songs = list(filter(None, [self.build_song(s) for s in self.songfiles]))
 
     def __str__(self):
         return '<Pack {}: ({} @ {})>'.format(self.name, self.path, hex(id(self)))
@@ -219,23 +232,30 @@ class Pack:
         path = path.resolve()
 
         if not path.is_dir():
-            raise ValueError('Must be passed a directory of a pack rather than a file')
+            raise ValueError('Must be passed a directory of a pack rather than a file: {}'.format(path))
 
         # iterdir returns a list of all subfiles in a particular directory, in one level
         # list of the name ...
         songfiles = [SongFiles.from_path(p) for p in path.iterdir() if p.is_dir()]
-        
+
         name = path.name
 
         return cls(name, path, songfiles)
 
     def build_song(self, songfile):
         highest_priority = songfile.get_highest_priority_simfile()
-        parser = EXTENSIONS_TO_PARSER_MAP[highest_priority.suffix]
-        return parser.parse(
-            filename=highest_priority,
-            pack_name=self.name,
-            pack_link=None)
+        if not highest_priority:
+            logging.warning("Could not find any valid simfiles in directory: %s", songfile.path)
+            return None
+        parser = EXTENSIONS_TO_PARSER_MAP[highest_priority.suffix.lower()]
+        try:
+            return parser.parse(
+                filename=highest_priority,
+                pack_name=self.name,
+                pack_link=None)
+        except UnicodeDecodeError:
+            logging.error("Could not determine encoding / bad byte in file: %s", highest_priority)
+            return None
 
 class Loader(object):
     """docstring for Loader"""
