@@ -29,7 +29,6 @@ class Song:
         # This formats a string for displaying song; {} is a wildcard
         return '<Song {} - {}: ({} @ {})>'.format(self.artist, self.name, self.pack_name, hex(id(self)))
 
-
     def __repr__(self):
         # This formats the interal 'representation' for displaying song; {} is a wildcard
         # For in the REPL, as opposed to calling print or str on something
@@ -257,15 +256,18 @@ class Pack:
             logging.error("Could not determine encoding / bad byte in file: %s", highest_priority)
             return None
 
+
 class Loader(object):
     """docstring for Loader"""
     def load(self, songs):
         pass
 
+
 class MongoLoader(Loader):
     """docstring for MongoLoader"""
     def load(self, songs):
         pass
+
 
 class FaunaDBLoader(Loader):
     """docstring for FaunaDBLoader"""
