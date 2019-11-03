@@ -145,9 +145,9 @@ class SMParser(Parser):
 
 
 EXTENSIONS_TO_PARSER_MAP = {
-    '.ssc': SSCParser,
-    '.sm': SMParser,
-    '.dwi': DWIParser,
+    '.ssc': SSCParser(),
+    '.sm': SMParser(),
+    '.dwi': DWIParser(),
 }
 
 
@@ -231,7 +231,7 @@ class Pack:
 
     def build_song(self, songfile):
         highest_priority = songfile.get_highest_priority_simfile()
-        parser = EXTENSIONS_TO_PARSER_MAP[highest_priority.suffix]()
+        parser = EXTENSIONS_TO_PARSER_MAP[highest_priority.suffix]
         return parser.parse(
             filename=highest_priority,
             pack_name=self.name,
