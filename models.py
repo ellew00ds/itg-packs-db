@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import List, Union
+import re
 
 from multidict import MultiDict
 
@@ -56,7 +57,8 @@ class ParsedMultiDict(MultiDict):
         TODO: learn how this works
         """
         with open(filename, "r") as fp:
-            raw = fp.read()
+            raw = re.sub(r'\/\/.*$', '', fp.read(), flags=re.MULTILINE)
+        
         parsed = cls()
         """
         Each "key" in the file is separated by a semicolon.
@@ -123,18 +125,23 @@ class DWIParser(Parser):
         parsed_difficulties = {}
 
         for item in single_difficulties:
-            difficulty, level, _ = item.split(':')
-            parsed_difficulties[difficulty.lower()] = int(level)
+            difficulty, meter, _ = item.split(':')
+            parsed_difficulties[difficulty.lower()] = int(meter)
 
         return parsed_difficulties
 
 
 class SMParser(Parser):
     def get_difficulty(self, multidict):
-        print("I haven't been configured yet!")
-        print("my name: {}".format(self.get_song_name(multidict)))
+        difficulties = {}
+        notes_all = multidict.getall('notes')
+        for note_blob in notes_all:
+            notes = ''.join([n for n in note_blob if n != '\n' and n != ' '])
+            notes_type, _, difficulty, meter, _ = notes.split(':', 4)
+            if notes_type == 'dance-single':
+                difficulties[difficulty.lower()] = int(meter)
 
-        return {}
+        return difficulties
 
 
 EXTENSIONS_TO_PARSER_MAP = {
