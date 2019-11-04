@@ -1,5 +1,5 @@
 import argparse
-from models import Pack, FaunaDBLoader
+from models import Pack, FaunaDBLoader, MongoLoader
 from pathlib import Path
 import logging
 
@@ -12,7 +12,9 @@ parser = argparse.ArgumentParser(description='Simfile Parser')
 group = parser.add_mutually_exclusive_group()
 group.add_argument('--packs_path', default='packs/')
 group.add_argument('--pack')
+parser.add_argument('--load')
 args = parser.parse_args()
+
 if args.pack:
     pack_dir = Pack.from_path(args.pack)
     with open('songinfo.json', 'w') as fp:
@@ -30,6 +32,10 @@ elif args.packs_path:
             for song in pack.songs:
                 fp.write(song.to_json())
                 fp.write('\n')
+
+if args.load == 'mongo':
+    loader = MongoLoader()
+    loader.load()
 
 """
 loader = FaunaDBLoader()

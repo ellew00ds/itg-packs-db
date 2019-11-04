@@ -1,7 +1,9 @@
 from pathlib import Path
 from typing import List, Union
+from mongo import make_mongo_client
 import re
 import logging
+import json
 
 from multidict import MultiDict
 
@@ -265,8 +267,18 @@ class Loader(object):
 
 class MongoLoader(Loader):
     """docstring for MongoLoader"""
-    def load(self, songs):
-        pass
+    def __init__(self):
+        self.client = make_mongo_client()
+        self.db = self.client['itg']
+        self.coll = self.db['simfiles']
+    #from pdb import set_trace
+    #set_trace()
+
+    def load(self, simfile_json='songinfo.json'):
+        with open(simfile_json, 'r') as fp:
+            for line in fp:
+                json_doc = json.loads(line)
+                self.coll.insert_one(json_doc)
 
 
 class FaunaDBLoader(Loader):
