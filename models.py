@@ -117,7 +117,7 @@ class Parser(object):
     def parse(self, filename, pack_name, pack_link):
         loaded_multidict = ParsedMultiDict.load(filename)
 
-        return Song(
+        parsed_song = Song(
             name=self.get_song_name(loaded_multidict),
             artist=self.get_song_artist(loaded_multidict),
             bpm=self.get_bpm(loaded_multidict),
@@ -125,6 +125,17 @@ class Parser(object):
             pack_link=pack_link,
             difficulty=self.get_difficulty(loaded_multidict)
         )
+
+        # We're putting cleanup logic here. Maybe belongs in another place.
+        song_name = parsed_song.name
+        if song_name.startswith("["):
+            parsed_song.difficulty["Challenge"] = song_name.split('] ')[0][1:]
+            parsed_song.name = song_name.split('] ')[2]
+
+        if parsed_song.bpm:
+            parsed_song.bpm = int(float(parsed_song.bpm))
+
+        return parsed_song
 
 
 class SSCParser(Parser):
