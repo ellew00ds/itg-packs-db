@@ -274,6 +274,11 @@ class MongoLoader(Loader):
     #from pdb import set_trace
     #set_trace()
 
+    def drop(self):
+        from pdb import set_trace
+        #set_trace()
+        #self.coll.drop()
+
     def load(self, simfile_json='songinfo.json'):
         with open(simfile_json, 'r') as fp:
             for line in fp:
