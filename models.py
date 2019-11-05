@@ -102,7 +102,14 @@ class Parser(object):
 
     def get_bpm(self, multidict):
         ''' special handling for bpm here'''
-        return multidict.get('bpm')
+        if multidict.get('bpm'):
+            return multidict.get('bpm')
+        elif multidict.get('bpms'):
+            return multidict.get('bpms').split(',')[0].strip('0.000=')
+        else:
+            print("get_bpm couldn't find no bpms muchacho")
+            print(multidict.get('title'))
+            return None
 
     def get_difficulty(self, multidict):
         raise NotImplementedError

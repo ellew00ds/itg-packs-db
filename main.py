@@ -36,12 +36,12 @@ if args.drop and not args.load:
         print("When --drop is used, you must specify 'mongo' or 'fauna'")
 elif args.pack:
     pack_dir = Pack.from_path(args.pack)
+    from pdb import set_trace
+    set_trace()
     with open('songinfo.json', 'w') as fp:
         for song in pack_dir.songs:
             fp.write(song.to_json())
             fp.write('\n')
-    #from pdb import set_trace
-    #set_trace()
 elif args.packs_path:
     pack_dir = args.packs_path
     with open('songinfo.json', 'w') as fp:
