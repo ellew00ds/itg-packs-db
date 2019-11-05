@@ -55,13 +55,13 @@ elif args.packs_path:
 if args.load == 'mongo' and not args.drop:
     loader = MongoLoader()
     loader.load()
-    print("Loaded MongoDB")
+    print(f"Loaded MongoDB collection {loader.coll.full_name}")
 elif args.load == 'mongo' and args.drop:
     loader = MongoLoader()
     loader.drop()
-    print("Dropped simfiles coll from MongoDB")
+    print(f"Dropped {loader.coll.full_name} collection from MongoDB")
     loader.load()
-    print("Loaded MongoDB")
+    print(f"Loaded MongoDB collection {loader.coll.full_name}")
 elif args.load == 'fauna' and not args.drop:
     print("--load fauna: not implemented yet")
 elif args.load == 'fauna' and args.drop:
