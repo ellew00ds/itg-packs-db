@@ -105,7 +105,7 @@ class Parser(object):
         if multidict.get('bpm'):
             return multidict.get('bpm')
         elif multidict.get('bpms'):
-            return multidict.get('bpms').split(',')[0].strip('0.000=')
+            return int(float(re.sub(r'^0.0*=', '', multidict.get('bpms').split(',')[0])))
         else:
             print("get_bpm couldn't find no bpms muchacho")
             print(multidict.get('title'))
@@ -128,6 +128,8 @@ class Parser(object):
 
         # We're putting cleanup logic here. Maybe belongs in another place.
         if parsed_song.bpm:
+            # from pdb import set_trace
+            # set_trace()
             parsed_song.bpm = int(float(parsed_song.bpm))
 
         song_name = parsed_song.name
