@@ -127,13 +127,15 @@ class Parser(object):
         )
 
         # We're putting cleanup logic here. Maybe belongs in another place.
+        if parsed_song.bpm:
+            parsed_song.bpm = int(float(parsed_song.bpm))
+
         song_name = parsed_song.name
         if song_name.startswith("["):
             parsed_song.difficulty["Challenge"] = song_name.split('] ')[0][1:]
+            if song_name.split('] ')[1].startswith("["):
+                parsed_song.bpm = song_name.split('] ')[1][1:]
             parsed_song.name = song_name.split('] ')[2]
-
-        if parsed_song.bpm:
-            parsed_song.bpm = int(float(parsed_song.bpm))
 
         return parsed_song
 
