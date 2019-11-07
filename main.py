@@ -14,16 +14,17 @@ group.add_argument('--packs_path',
                    help="Specify path to packs parent dir, if not './packs'",
                    default='packs/')
 group.add_argument('--pack',
-                   help="Specify path to individual pack - typically for testing purposes")
+                   help="Specify path to individual pack - typically for \
+                   testing purposes")
 parser.add_argument('--load',
-                    help="Specifies which database to populate. Possible arguments:\nmongo\nfauna")
+                    help="Specifies which database to populate. \
+                    Possible arguments:\nmongo\nfauna")
 parser.add_argument('--drop',
                     help="If specified with --load, will drop\
-                    the relevant mongo or fauna collection before loading again. \
-                    You must specify whether you want to drop the fauna or mongo collection")
+                    the relevant mongo or fauna collection before loading \
+                    again. You must specify whether you want to drop the \
+                    fauna or mongo collection")
 args = parser.parse_args()
-#from pdb import set_trace
-#set_trace()
 
 if args.drop and not args.load:
     if args.drop == 'mongo':
@@ -36,8 +37,6 @@ if args.drop and not args.load:
         print("When --drop is used, you must specify 'mongo' or 'fauna'")
 elif args.pack:
     pack_dir = Pack.from_path(args.pack)
-    from pdb import set_trace
-    set_trace()
     with open('songinfo.json', 'w') as fp:
         for song in pack_dir.songs:
             fp.write(song.to_json())

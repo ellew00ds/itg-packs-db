@@ -29,10 +29,14 @@ class Song:
 
     def __str__(self):
         # This formats a string for displaying song; {} is a wildcard
-        return '<Song {} - {}: ({} @ {})>'.format(self.artist, self.name, self.pack_name, hex(id(self)))
+        return '<Song {} - {}: ({} @ {})>'.format(self.artist,
+                                                  self.name,
+                                                  self.pack_name,
+                                                  hex(id(self)))
 
     def __repr__(self):
-        # This formats the interal 'representation' for displaying song; {} is a wildcard
+        # This formats the interal 'representation' for...
+        # displaying song; {} is a wildcard
         # For in the REPL, as opposed to calling print or str on something
         return self.__str__()
 
@@ -50,12 +54,14 @@ class Song:
         from json import dumps
         return dumps(self.to_dict())
 
+
 class ParsedMultiDict(MultiDict):
     @classmethod
     def load(cls, filename):
         """Loads k/v pair formatted file into a multidict.
 
-        @classmethod uses a passed class, in this case returns a configured instance
+        @classmethod uses a passed class, in this case...
+        returns a configured instance
         TODO: learn how this works
         """
         with open(filename, "r") as fp:
@@ -78,7 +84,8 @@ class ParsedMultiDict(MultiDict):
                 continue
             """
             Takes only the first k/v pair in a given semicolon grouping
-            In case there are instances of values without keys, i.e. there are 2 colons in a row
+            In case there are instances of values without keys
+            i.e. there are 2 colons in a row
             """
             try:
                 k, v = value.split(":", 1)
@@ -144,7 +151,9 @@ class Parser(object):
 
 class SSCParser(Parser):
     def get_difficulty(self, multidict):
-        difficulties = list(map(lambda x: x.lower(), multidict.getall('difficulty')))
+        difficulties = list(map(
+                                lambda x: x.lower(),
+                                multidict.getall('difficulty')))
         meters = multidict.getall('meter')
 
         if len(difficulties) != len(meters):
@@ -190,7 +199,9 @@ def get_priority_for_filename(filename):
         if filename.suffix.lower() == extension:
             return priority
     else:
-        raise ValueError('Improper filename {}. should be one of: {}'.format(filename, set(PRIORITIES.keys())))
+        raise ValueError('Improper filename {}. \
+            Should be one of: {}'.format(filename, set(PRIORITIES.keys())))
+
 
 # given foo.ssc, bar.sm, fizz.dwi, will return foo.ssc
 # given fizz.dwi, bar.sm, will return bar.sm
@@ -208,7 +219,9 @@ class SongFiles:
         self.simfiles = simfiles
 
     def __str__(self):
-        return '<SongFiles {}: ({} @ {})>'.format(self.name, self.path, hex(id(self)))
+        return '<SongFiles {}: ({} @ {})>'.format(self.name,
+                                                  self.path,
+                                                  hex(id(self)))
 
     def __repr__(self):
         return self.__str__()
@@ -221,7 +234,8 @@ class SongFiles:
         path = path.resolve()
 
         if not path.is_dir():
-            raise ValueError('Must be passed a directory of a song rather than a file: {}'.format(path))
+            raise ValueError('Must be passed a directory of a song \
+                rather than a file: {}'.format(path))
 
         simfiles = list(filter(lambda x: x.is_file() and x.suffix.lower().endswith(FILE_SUFFIXES),
                         path.rglob('*.*')))
@@ -239,10 +253,14 @@ class Pack:
         self.name = name
         self.path = path
         self.songfiles = songfiles
-        self.songs = list(filter(None, [self.build_song(s) for s in self.songfiles]))
+        self.songs = list(
+            filter(None, [self.build_song(s) for s in self.songfiles])
+            )
 
     def __str__(self):
-        return '<Pack {}: ({} @ {})>'.format(self.name, self.path, hex(id(self)))
+        return '<Pack {}: ({} @ {})>'.format(self.name,
+                                             self.path,
+                                             hex(id(self)))
 
     def __repr__(self):
         return self.__str__()
@@ -255,11 +273,14 @@ class Pack:
         path = path.resolve()
 
         if not path.is_dir():
-            raise ValueError('Must be passed a directory of a pack rather than a file: {}'.format(path))
+            raise ValueError('Must be passed a directory of a pack \
+                rather than a file: {}'.format(path))
 
-        # iterdir returns a list of all subfiles in a particular directory, in one level
-        # list of the name ...
-        songfiles = [SongFiles.from_path(p) for p in path.iterdir() if p.is_dir()]
+        # iterdir returns a list of all subfolders/files...
+        # in a particular directory, one level deep
+        songfiles = [
+            SongFiles.from_path(p) for p in path.iterdir() if p.is_dir()
+            ]
 
         name = path.name
 
@@ -268,7 +289,8 @@ class Pack:
     def build_song(self, songfile):
         highest_priority = songfile.get_highest_priority_simfile()
         if not highest_priority:
-            logging.warning("Could not find any valid simfiles in directory: %s", songfile.path)
+            logging.warning("Could not find any valid simfiles \
+                in directory: %s", songfile.path)
             return None
         parser = EXTENSIONS_TO_PARSER_MAP[highest_priority.suffix.lower()]
         try:
@@ -277,7 +299,8 @@ class Pack:
                 pack_name=self.name,
                 pack_link=None)
         except UnicodeDecodeError:
-            logging.error("Could not determine encoding / bad byte in file: %s", highest_priority)
+            logging.error("Could not determine encoding / bad byte \
+                in file: %s", highest_priority)
             return None
 
 
@@ -293,13 +316,9 @@ class MongoLoader(Loader):
         self.client = make_mongo_client()
         self.db = self.client['itg']
         self.coll = self.db['simfiles']
-    #from pdb import set_trace
-    #set_trace()
 
     def drop(self):
-        from pdb import set_trace
-        #set_trace()
-        #self.coll.drop()
+        self.coll.drop()
 
     def load(self, simfile_json='songinfo.json'):
         with open(simfile_json, 'r') as fp:
