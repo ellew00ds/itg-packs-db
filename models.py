@@ -19,13 +19,14 @@ PRIORITIES = {
 
 
 class Song:
-    def __init__(self, name, artist, bpm, pack_name, pack_link, difficulty):
+    def __init__(self, name, artist, bpm, pack_name, pack_link, difficulty, difficulties):
         self.name = name
         self.artist = artist
         self.bpm = bpm
         self.pack_name = pack_name
         self.pack_link = pack_link
         self.difficulty = difficulty
+        self.difficulties = difficulties
 
     def __str__(self):
         # This formats a string for displaying song; {} is a wildcard
@@ -45,9 +46,9 @@ class Song:
             'song_name': self.name,
             'song_artist': self.artist,
             'bpm': self.bpm,
-            'pack_name': self.pack_name,
-            'pack_link': self.pack_link,
+            'pack': {'name': self.pack_name, 'link': 'null', 'song_count':'null'},
             'difficulty': self.difficulty,
+            'difficulties': self.difficulties,
         }
 
     def to_json(self):
@@ -130,7 +131,8 @@ class Parser(object):
             bpm=self.get_bpm(loaded_multidict),
             pack_name=pack_name,
             pack_link=pack_link,
-            difficulty=self.get_difficulty(loaded_multidict)
+            difficulty=self.get_difficulty(loaded_multidict),
+            difficulties=None
         )
 
         # We're putting cleanup logic here. Maybe belongs in another place.
@@ -146,7 +148,16 @@ class Parser(object):
                 parsed_song.bpm = song_name.split('] ')[1][1:]
             parsed_song.name = song_name.split('] ')[2]
 
+        parsed_song.difficulties = map_to_diffs(parsed_song.difficulty)
+
         return parsed_song
+
+
+def map_to_diffs(difficulty):
+    difficulties = []
+    for k, v in difficulty.items():
+        difficulties.append(v)
+    return difficulties
 
 
 class SSCParser(Parser):
