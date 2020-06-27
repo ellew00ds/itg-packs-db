@@ -19,20 +19,19 @@ PRIORITIES = {
 
 
 class Song:
-    def __init__(self, name, artist, bpm, pack_name, pack_link, difficulty, difficulties):
+    def __init__(self, name, artist, bpm, pack, difficulty_map, difficulties):
         self.name = name
         self.artist = artist
         self.bpm = bpm
-        self.pack_name = pack_name
-        self.pack_link = pack_link
-        self.difficulty = difficulty
+        self.pack = pack
+        self.difficulty = difficulty_map
         self.difficulties = difficulties
 
     def __str__(self):
         # This formats a string for displaying song; {} is a wildcard
         return '<Song {} - {}: ({} @ {})>'.format(self.artist,
                                                   self.name,
-                                                  self.pack_name,
+                                                  self.pack['name'],
                                                   hex(id(self)))
 
     def __repr__(self):
@@ -43,11 +42,11 @@ class Song:
 
     def to_dict(self):
         return {
-            'song_name': self.name,
-            'song_artist': self.artist,
+            'name': self.name,
+            'artist': self.artist,
             'bpm': self.bpm,
-            'pack': {'name': self.pack_name, 'link': 'null', 'song_count':'null'},
-            'difficulty': self.difficulty,
+            'pack': {'name': self.pack['name'], 'link': 'null', 'song_count':'null'},
+            'difficulty_map': self.difficulty,
             'difficulties': self.difficulties,
         }
 
@@ -129,9 +128,11 @@ class Parser(object):
             name=self.get_song_name(loaded_multidict),
             artist=self.get_song_artist(loaded_multidict),
             bpm=self.get_bpm(loaded_multidict),
-            pack_name=pack_name,
-            pack_link=pack_link,
-            difficulty=self.get_difficulty(loaded_multidict),
+            pack={
+                'name': pack_name,
+                'link': pack_link
+            },
+            difficulty_map=self.get_difficulty(loaded_multidict),
             difficulties=None
         )
 
@@ -149,7 +150,7 @@ class Parser(object):
             parsed_song.name = song_name.split('] ')[2]
 
         parsed_song.difficulties = map_to_diffs(parsed_song.difficulty)
-
+        print(parsed_song)
         return parsed_song
 
 

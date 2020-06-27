@@ -168,6 +168,6 @@ trash/
 t.py
 
 # No songinfo.json
-songinfo.json
+songinfo*
 
 # End of https://www.gitignore.io/api/macos,python
