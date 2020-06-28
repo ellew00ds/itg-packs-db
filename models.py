@@ -19,12 +19,12 @@ PRIORITIES = {
 
 
 class Song:
-    def __init__(self, name, artist, bpm, pack, difficulty_map, difficulties):
+    def __init__(self, name, artist, bpm, pack, difficultyMap, difficulties):
         self.name = name
         self.artist = artist
         self.bpm = bpm
         self.pack = pack
-        self.difficulty = difficulty_map
+        self.difficulty = difficultyMap
         self.difficulties = difficulties
 
     def __str__(self):
@@ -46,7 +46,7 @@ class Song:
             'artist': self.artist,
             'bpm': self.bpm,
             'pack': {'name': self.pack['name'], 'link': 'null', 'song_count':'null'},
-            'difficulty_map': self.difficulty,
+            'difficultyMap': self.difficulty,
             'difficulties': self.difficulties,
         }
 
@@ -132,7 +132,7 @@ class Parser(object):
                 'name': pack_name,
                 'link': pack_link
             },
-            difficulty_map=self.get_difficulty(loaded_multidict),
+            difficultyMap=self.get_difficulty(loaded_multidict),
             difficulties=None
         )
 
