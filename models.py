@@ -24,7 +24,7 @@ class Song:
         self.artist = artist
         self.bpm = bpm
         self.pack = pack
-        self.difficultyMap = difficultyMap
+        self.difficulty = difficultyMap
         self.difficulties = difficulties
 
     def __str__(self):
@@ -45,8 +45,8 @@ class Song:
             'name': self.name,
             'artist': self.artist,
             'bpm': self.bpm,
-            'pack': {'name': self.pack['name'], 'link': None, 'songCount': None},
-            'difficultyMap': self.difficultyMap,
+            'pack': {'name': self.pack['name'], 'link': 'null', 'song_count':'null'},
+            'difficultyMap': self.difficulty,
             'difficulties': self.difficulties,
         }
 
@@ -144,19 +144,19 @@ class Parser(object):
 
         song_name = parsed_song.name
         if song_name.startswith("["):
-            parsed_song.difficultyMap["Challenge"] = song_name.split('] ')[0][1:]
+            parsed_song.difficulty["Challenge"] = song_name.split('] ')[0][1:]
             if song_name.split('] ')[1].startswith("["):
                 parsed_song.bpm = song_name.split('] ')[1][1:]
             parsed_song.name = song_name.split('] ')[2]
 
-        parsed_song.difficulties = map_to_diffs(parsed_song.difficultyMap)
+        parsed_song.difficulties = map_to_diffs(parsed_song.difficulty)
         print(parsed_song)
         return parsed_song
 
 
-def map_to_diffs(difficultyMap):
+def map_to_diffs(difficulty):
     difficulties = []
-    for k, v in difficultyMap.items():
+    for k, v in difficulty.items():
         difficulties.append(v)
     return difficulties
 
@@ -165,7 +165,7 @@ class SSCParser(Parser):
     def get_difficulty(self, multidict):
         difficulties = list(map(
                                 lambda x: x.lower(),
-                                multidict.getall('difficultyMap')))
+                                multidict.getall('difficulty')))
         meters = multidict.getall('meter')
 
         if len(difficulties) != len(meters):
@@ -180,8 +180,8 @@ class DWIParser(Parser):
         parsed_difficulties = {}
 
         for item in single_difficulties:
-            difficultyMap, meter, _ = item.split(':')
-            parsed_difficulties[difficultyMap.lower()] = int(meter)
+            difficulty, meter, _ = item.split(':')
+            parsed_difficulties[difficulty.lower()] = int(meter)
 
         return parsed_difficulties
 
@@ -192,9 +192,9 @@ class SMParser(Parser):
         notes_all = multidict.getall('notes')
         for note_blob in notes_all:
             notes = ''.join([n for n in note_blob if n != '\n' and n != ' '])
-            notes_type, _, difficultyMap, meter, _ = notes.split(':', 4)
+            notes_type, _, difficulty, meter, _ = notes.split(':', 4)
             if notes_type == 'dance-single':
-                difficulties[difficultyMap.lower()] = int(meter)
+                difficulties[difficulty.lower()] = int(meter)
 
         return difficulties
 
@@ -333,10 +333,15 @@ class MongoLoader(Loader):
         self.coll.drop()
 
     def load(self, simfile_json='songinfo.json'):
+        print("Loading docs into collection...")
         with open(simfile_json, 'r') as fp:
             for line in fp:
                 json_doc = json.loads(line)
-                self.coll.insert_one(json_doc)
+                self.coll.find_one_and_replace(
+                    {'name': json_doc['name'], 'pack.name': json_doc['pack']['name']},
+                    json_doc,
+                    upsert=True
+                )
 
 
 class FaunaDBLoader(Loader):
