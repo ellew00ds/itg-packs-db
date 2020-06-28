@@ -45,7 +45,7 @@ class Song:
             'name': self.name,
             'artist': self.artist,
             'bpm': self.bpm,
-            'pack': {'name': self.pack['name'], 'link': 'null', 'song_count':'null'},
+            'pack': {'name': self.pack['name'], 'link': None, 'song_count': None},
             'difficulty_map': self.difficulty,
             'difficulties': self.difficulties,
         }
