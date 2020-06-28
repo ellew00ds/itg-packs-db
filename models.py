@@ -19,12 +19,12 @@ PRIORITIES = {
 
 
 class Song:
-    def __init__(self, name, artist, bpm, pack, difficulty_map, difficulties):
+    def __init__(self, name, artist, bpm, pack, difficultyMap, difficulties):
         self.name = name
         self.artist = artist
         self.bpm = bpm
         self.pack = pack
-        self.difficulty = difficulty_map
+        self.difficultyMap = difficultyMap
         self.difficulties = difficulties
 
     def __str__(self):
@@ -45,8 +45,8 @@ class Song:
             'name': self.name,
             'artist': self.artist,
             'bpm': self.bpm,
-            'pack': {'name': self.pack['name'], 'link': None, 'song_count': None},
-            'difficulty_map': self.difficulty,
+            'pack': {'name': self.pack['name'], 'link': None, 'songCount': None},
+            'difficultyMap': self.difficultyMap,
             'difficulties': self.difficulties,
         }
 
@@ -132,7 +132,7 @@ class Parser(object):
                 'name': pack_name,
                 'link': pack_link
             },
-            difficulty_map=self.get_difficulty(loaded_multidict),
+            difficultyMap=self.get_difficulty(loaded_multidict),
             difficulties=None
         )
 
@@ -144,19 +144,19 @@ class Parser(object):
 
         song_name = parsed_song.name
         if song_name.startswith("["):
-            parsed_song.difficulty["Challenge"] = song_name.split('] ')[0][1:]
+            parsed_song.difficultyMap["Challenge"] = song_name.split('] ')[0][1:]
             if song_name.split('] ')[1].startswith("["):
                 parsed_song.bpm = song_name.split('] ')[1][1:]
             parsed_song.name = song_name.split('] ')[2]
 
-        parsed_song.difficulties = map_to_diffs(parsed_song.difficulty)
+        parsed_song.difficulties = map_to_diffs(parsed_song.difficultyMap)
         print(parsed_song)
         return parsed_song
 
 
-def map_to_diffs(difficulty):
+def map_to_diffs(difficultyMap):
     difficulties = []
-    for k, v in difficulty.items():
+    for k, v in difficultyMap.items():
         difficulties.append(v)
     return difficulties
 
@@ -165,7 +165,7 @@ class SSCParser(Parser):
     def get_difficulty(self, multidict):
         difficulties = list(map(
                                 lambda x: x.lower(),
-                                multidict.getall('difficulty')))
+                                multidict.getall('difficultyMap')))
         meters = multidict.getall('meter')
 
         if len(difficulties) != len(meters):
@@ -180,8 +180,8 @@ class DWIParser(Parser):
         parsed_difficulties = {}
 
         for item in single_difficulties:
-            difficulty, meter, _ = item.split(':')
-            parsed_difficulties[difficulty.lower()] = int(meter)
+            difficultyMap, meter, _ = item.split(':')
+            parsed_difficulties[difficultyMap.lower()] = int(meter)
 
         return parsed_difficulties
 
@@ -192,9 +192,9 @@ class SMParser(Parser):
         notes_all = multidict.getall('notes')
         for note_blob in notes_all:
             notes = ''.join([n for n in note_blob if n != '\n' and n != ' '])
-            notes_type, _, difficulty, meter, _ = notes.split(':', 4)
+            notes_type, _, difficultyMap, meter, _ = notes.split(':', 4)
             if notes_type == 'dance-single':
-                difficulties[difficulty.lower()] = int(meter)
+                difficulties[difficultyMap.lower()] = int(meter)
 
         return difficulties
 
