@@ -139,13 +139,15 @@ class Parser(object):
             difficulties=None
         )
 
-        # We're putting cleanup logic here. Maybe belongs in another place.
         if parsed_song.bpm:
+            # Uncomment this for a handy trace debugger
             # from pdb import set_trace
             # set_trace()
             parsed_song.bpm = int(float(parsed_song.bpm))
 
         song_name = parsed_song.name
+        # Note: Songs with prefix [Megamix] or [Marathon] in the title will
+        # cause the parser to fail. Remove them from the directory and rerun
         if song_name.startswith("["):
             parsed_song.difficulty["Challenge"] = song_name.split('] ')[0][1:]
             if song_name.split('] ')[1].startswith("["):
