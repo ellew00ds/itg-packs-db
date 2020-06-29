@@ -149,6 +149,7 @@ class Parser(object):
         # Note: Songs with prefix [Megamix] or [Marathon] in the title will
         # cause the parser to fail. Remove them from the directory and rerun
         if song_name.startswith("["):
+            print(filename)
             parsed_song.difficulty["Challenge"] = song_name.split('] ')[0][1:]
             if song_name.split('] ')[1].startswith("["):
                 parsed_song.bpm = song_name.split('] ')[1][1:]
@@ -198,7 +199,7 @@ class SMParser(Parser):
         for note_blob in notes_all:
             notes = ''.join([n for n in note_blob if n != '\n' and n != ' '])
             notes_type, _, difficulty, meter, _ = notes.split(':', 4)
-            if notes_type == 'dance-single':
+            if notes_type == 'dance-single' and meter != '':
                 difficulties[difficulty.lower()] = int(meter)
 
         return difficulties
