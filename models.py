@@ -113,7 +113,6 @@ class Parser(object):
             return multidict.get('bpm')
         elif multidict.get('bpms'):
             bpms_string = (re.sub(r'^0.0*=', '', multidict.get('bpms').split(',')[0]))
-            print(bpms_string)
             if '0=' in bpms_string:
                 return int(float(bpms_string[2:]))
             return int(float(bpms_string))
