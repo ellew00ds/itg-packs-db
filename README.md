@@ -1,5 +1,5 @@
-# In The Groove Packs Database
-Source code for In The Groove packs database, containing song information by pack. [This site can be used](https://search.stepmaniaonline.net/) as inspiration.
+# StepMania Packs Database
+Source code for the song pack parser for a StepMania packs database called [Fit Up Your Style](https://fitupyourstyle.com/), containing song information by pack. [This site was used](https://search.stepmaniaonline.net/) as inspiration.
 
 ## Installing
 From the Terminal, clone this repo onto your computer with:
@@ -14,9 +14,11 @@ Move into the new directory:
 cd itg-packs-db/
 ```
 
-Run the parser on a `packs` directory:
+Add your `t.py` credentials file to the top-level directory.
+
+Run the parser on a `packs` directory to load data into MongoDB:
 ```
-python3 parser.py
+python3 main.py --load mongo
 ```
 
 ## Steps to project completion
@@ -35,26 +37,32 @@ python3 parser.py
 Document structure:
 ```json
 {
-    "song_name": "Dream a Dream",
-    "song_artist": "Captain Jack",
-    "bpm": "120",
-    "pack_name": "DDR MAX 2",
-    "pack_link": "drive.google.com/heyohcaptainjack",
-    "difficulty": {
+    "name": "Dream a Dream",
+    "artist": "Captain Jack",
+    "bpm": 120,
+    "pack": {
+        "name" : "DDR MAX 2",
+        "link": "drive.google.com/heyohcaptainjack",
+    },
+    "difficultyMap": {
         "light": "3",
         "standard": "5",
         "heavy": "7"
-    }
+    },
+    "difficulties": [
+        3, 7, 5
+    ]
 }
+
 ```
 
 ## Built With
 
 * Python 3
-* [FaunaDB](https://fauna.com/)
 
 ## Contributors
 
 * **Lewis King** - [Github](https://github.com/lewisisgood)
 * **Chandler Wyatt** - [Github](https://github.com/chandlerwyatt)
 * **Gene Peters** - [Github](https://github.com/gene-telligent)
+* **Chandler Wyatt** - [Github](https://github.com/ryanxgraham)
