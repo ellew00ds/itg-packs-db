@@ -21,20 +21,7 @@ Run the parser on a `packs` directory to load data into MongoDB:
 python3 main.py --load mongo
 ```
 
-## Steps to project completion
-
-* Manually download all packs in `spreadsheet` to one of the hard drives on `the server`
-	* These are a mix of GDrive, Dropbox, etc. links
-
-* Unzip packs
-
-* Run parser on all packs
-
-* Load each song as a single record in one cloud database
-
-* Create front-end for database using React
-
-Document structure:
+## Document Structure
 ```json
 {
     "name": "Dream a Dream",
