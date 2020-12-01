@@ -158,11 +158,12 @@ dmypy.json
 # no __MACOSX files
 __MACOSX
 
-# no packs, dls, notes, or trash
+# no packs, dls, notes, trash, or tmp
 packs/
 dl/
 notes/
 trash/
+tmp/
 
 # No t.py
 t.py

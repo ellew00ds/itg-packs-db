@@ -112,7 +112,10 @@ class Parser(object):
         if multidict.get('bpm'):
             return multidict.get('bpm')
         elif multidict.get('bpms'):
-            return int(float(re.sub(r'^0.0*=', '', multidict.get('bpms').split(',')[0])))
+            bpms_string = (re.sub(r'^0.0*=', '', multidict.get('bpms').split(',')[0]))
+            if '0=' in bpms_string:
+                return int(float(bpms_string[2:]))
+            return int(float(bpms_string))
         else:
             print("get_bpm couldn't find no bpms muchacho")
             print(multidict.get('title'))
@@ -136,14 +139,17 @@ class Parser(object):
             difficulties=None
         )
 
-        # We're putting cleanup logic here. Maybe belongs in another place.
         if parsed_song.bpm:
+            # Uncomment this for a handy trace debugger
             # from pdb import set_trace
             # set_trace()
             parsed_song.bpm = int(float(parsed_song.bpm))
 
         song_name = parsed_song.name
+        # Note: Songs with prefix [Megamix] or [Marathon] in the title will
+        # cause the parser to fail. Remove them from the directory and rerun
         if song_name.startswith("["):
+            print(filename)
             parsed_song.difficulty["Challenge"] = song_name.split('] ')[0][1:]
             if song_name.split('] ')[1].startswith("["):
                 parsed_song.bpm = song_name.split('] ')[1][1:]
@@ -193,7 +199,7 @@ class SMParser(Parser):
         for note_blob in notes_all:
             notes = ''.join([n for n in note_blob if n != '\n' and n != ' '])
             notes_type, _, difficulty, meter, _ = notes.split(':', 4)
-            if notes_type == 'dance-single':
+            if notes_type == 'dance-single' and meter != '':
                 difficulties[difficulty.lower()] = int(meter)
 
         return difficulties
